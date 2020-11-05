@@ -25,7 +25,6 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 import base64 from "react-native-base64";
-import { Buffer } from 'buffer';
 
 const App = () => {
   const [info, setInfo] = useState('');
@@ -112,17 +111,28 @@ const App = () => {
       }
     });
     console.log(characteristicUUID);
-    device.monitorCharacteristicForService('8183d256-b358-4c62-a487-d2e7429bfc39', characteristicUUID, (error, characteristic) => {
-      if (error) {
-        setError(error.message)
-        return
-      }
-      //buffer 써도 똑같음. 너무많은 수신 문제인 거 같음. 다만 try catch로 에러 날때 자동 재실행 코드로 할 수는 있을 듯. 
-      const data = Buffer.from( base64.decode(characteristic.value))
-      //data = base64.decode(characteristic.value);
-      console.log(characteristic.value);
-      setInsoleData(data)
-    })
+    for(let i = 0; i<2000; i++){
+      await device.readCharacteristicForService('8183d256-b358-4c62-a487-d2e7429bfc39', characteristicUUID)
+      .then(
+        (res)=>{
+        data = base64.decode(res.value);
+        console.log(`${i} : ${data}`);
+        setInsoleData(data)
+        }
+      )
+    }
+    
+
+    //1000번 지나니까 에러뜸.
+    // device.monitorCharacteristicForService('8183d256-b358-4c62-a487-d2e7429bfc39', characteristicUUID, (error, characteristic) => {
+    //   if (error) {
+    //     setError(error.message)
+    //     return
+    //   }
+    //   data = base64.decode(characteristic.value);
+    //   console.log(data);
+    //   setInsoleData(data)
+    // })
   };
 
   return (
