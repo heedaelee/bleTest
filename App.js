@@ -64,7 +64,7 @@ const App = () => {
             setInfo('Setting notifications');
             return setupNotifications(device);
           })
-          .then(
+          .then( 
             () => {
               setInfo('Listening...');
             },
