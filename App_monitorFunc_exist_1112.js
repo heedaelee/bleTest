@@ -52,26 +52,26 @@ const App = () => {
         setError(error.message);
         return;
       }
-      setInfo(`Connecting to TI Sensor device.name: ${deviceName}`);
-      manager.stopDeviceScan();
-      device
-        .connect({requestMTU: 260})
-        .then((device) => {
-          setInfo('Discovering services and characteristics');
-          return device.discoverAllServicesAndCharacteristics();
-        })
-        .then((device) => {
-          setInfo('Setting notifications');
-          return setupNotifications(device, deviceName);
-        })
-        .then(
-          () => {
-            setInfo('Listening...');
-          },
-          (error) => {
-            setError(error.message);
-          },
-        );
+        setInfo(`Connecting to TI Sensor device.name: ${deviceName}`);
+        manager.stopDeviceScan();
+        device
+          .connect({requestMTU: 260})
+          .then((device) => {
+            setInfo('Discovering services and characteristics');
+            return device.discoverAllServicesAndCharacteristics();
+          })
+          .then((device) => {
+            setInfo('Setting notifications');
+            return setupNotifications(device, deviceName);
+          })
+          .then(
+            () => {
+              setInfo('Listening...');
+            },
+            (error) => {
+              setError(error.message);
+            },
+          );
     });
   };
   let chID;
@@ -120,16 +120,20 @@ const App = () => {
     setInterval(() => {
       device
         .readCharacteristicForService(uuid, characteristicUUID)
-        .then((res) => {
-          let data = base64.decode(res.value);
-          console.log(data);
-          if (data.type === 'left') {
-            setLeftInsoleData(data);
-          } else {
-            setRightInsoleData(data);
-          }
-        });
+        .then((res) => console.log(base64.decode(res.value)));
     }, 1000);
+
+    // device.monitorCharacteristicForService('8183d256-b358-4c62-a487-d2e7429bfc39', characteristicUUID, (error, characteristic) => {
+    //   if (error) {
+    //     setError(error.message)
+    //     return
+    //   }
+    //   //buffer 써도 똑같음. 너무많은 수신 문제인 거 같음. 다만 try catch로 에러 날때 자동 재실행 코드로 할 수는 있을 듯.
+    //   //const data = Buffer.from( base64.decode(characteristic.value))
+    //   data = base64.decode(characteristic.value);
+    //   console.log(characteristic.value);
+    //   setInsoleData(data)
+    // })
   };
 
   return (
@@ -148,8 +152,6 @@ const App = () => {
             <Text>{info}</Text>
             <Text>{error}</Text>
             <Text>{leftInsoleData}</Text>
-          </View>
-          <View style={styles.container1}>
             <Text>{rightInsoleData}</Text>
           </View>
         </View>
@@ -161,12 +163,6 @@ const App = () => {
 const styles = StyleSheet.create({
   scrollView: {
     backgroundColor: Colors.lighter,
-  },
-  container1: {
-    flex: 1,
-  },
-  container2: {
-    flex: 1,
   },
   engine: {
     position: 'absolute',
